@@ -3,7 +3,7 @@ Firestore Database Configuration
 """
 
 import os
-from google.cloud import firestore
+import firebase_admin
 from firebase_admin import credentials, firestore as admin_firestore, initialize_app
 
 # Initialize Firebase Admin SDK
@@ -11,7 +11,6 @@ def initialize_firebase():
     """Initialize Firebase Admin SDK"""
     try:
         # Check if already initialized
-        import firebase_admin
         if not firebase_admin._apps:
             # In production (App Engine), use default credentials
             if os.getenv('GOOGLE_APPLICATION_CREDENTIALS'):
@@ -86,7 +85,12 @@ def delete_document(collection_name, doc_id):
     collection.document(doc_id).delete()
     return True
 
-def query_documents(collection_name, filters=None, order_by=None, limit=None):
+def query_documents(
+    collection_name: str, 
+    filters: list[tuple[str, str, Any]] | None = None, 
+    order_by: str | None = None, 
+    limit: int | None = None
+) -> list[dict[str, Any]]:
     """Query documents with filters"""
     collection = get_collection(collection_name)
     query = collection

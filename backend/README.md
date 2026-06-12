@@ -45,6 +45,43 @@ backend/
 
 ### Local Development Setup
 
+#### Option 1: Using uv (Recommended - Fast!)
+
+1. **Install uv** (if not already installed):
+```bash
+# Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Mac/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+2. **Create virtual environment and install dependencies**:
+```bash
+cd backend
+
+# Create venv and install all dependencies in one command
+uv venv
+uv pip install -e .
+
+# Activate virtual environment
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+
+# Windows CMD
+.venv\Scripts\activate.bat
+
+# Mac/Linux
+source .venv/bin/activate
+```
+
+3. **Install dev dependencies** (optional):
+```bash
+uv pip install -e ".[dev]"
+```
+
+#### Option 2: Using pip (Traditional)
+
 1. **Create virtual environment**:
 ```bash
 python -m venv venv

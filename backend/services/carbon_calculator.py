@@ -3,9 +3,12 @@ Carbon Calculator Service
 Calculates CO2 emissions for various activities
 """
 
-from typing import Dict, Optional
-from datetime import datetime, timedelta
-from config.firestore import get_collection, query_documents
+from typing import Any
+from datetime import datetime
+from config.firestore import query_documents
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CarbonCalculator:
     """Service for calculating carbon emissions"""
@@ -60,7 +63,7 @@ class CarbonCalculator:
     }
     
     @staticmethod
-    def calculate_emissions(category: str, activity_type: str, amount: float, unit: str = None) -> Dict:
+    def calculate_emissions(category: str, activity_type: str, amount: float, unit: str | None = None) -> dict[str, Any]:
         """
         Calculate CO2 emissions for an activity
         
@@ -84,8 +87,8 @@ class CarbonCalculator:
                 raise ValueError(f"Invalid activity type: {activity_type}")
             
             factor_data = category_factors[activity_type]
-            emission_factor = factor_data['factor']
-            default_unit = factor_data['unit']
+            emission_factor = float(factor_data['factor'])
+            default_unit = str(factor_data['unit'])
             
             # Use provided unit or default
             used_unit = unit or default_unit
@@ -110,7 +113,7 @@ class CarbonCalculator:
             raise Exception(f"Error calculating emissions: {str(e)}")
     
     @staticmethod
-    def _calculate_equivalents(emissions_kg: float) -> Dict:
+    def _calculate_equivalents(emissions_kg: float) -> dict[str, float]:
         """
         Calculate relatable equivalents for CO2 emissions
         
@@ -120,6 +123,15 @@ class CarbonCalculator:
         Returns:
             Dictionary with various equivalents
         """
+        if emissions_kg == 0:
+            return {
+                'trees_needed': 0.0,
+                'km_driven': 0.0,
+                'flights_short': 0.0,
+                'burgers': 0.0,
+                'smartphone_charges': 0.0,
+            }
+        
         return {
             'trees_needed': round(emissions_kg / 20, 2),  # 1 tree absorbs ~20kg CO2/year
             'km_driven': round(emissions_kg / 0.192, 2),  # Average car emissions
@@ -153,11 +165,11 @@ class CarbonCalculator:
             return round(total, 2)
             
         except Exception as e:
-            print(f"Error getting daily total: {e}")
+            logger.error(f"Error getting daily total: {e}")
             return 0.0
     
     @staticmethod
-    def get_period_summary(user_id: str, start_date: str, end_date: str) -> Dict:
+    def get_period_summary(user_id: str, start_date: str, end_date: str) -> dict[str, Any]:
         """
         Get emissions summary for a time period
         
@@ -213,7 +225,7 @@ class CarbonCalculator:
             }
             
         except Exception as e:
-            print(f"Error getting period summary: {e}")
+            logger.error(f"Error getting period summary: {e}")
             return {
                 'total_emissions': 0,
                 'average_daily': 0,
@@ -222,7 +234,7 @@ class CarbonCalculator:
             }
     
     @staticmethod
-    def compare_to_baseline(user_id: str, current_emissions: float) -> Dict:
+    def compare_to_baseline(user_id: str, current_emissions: float) -> dict[str, Any]:
         """
         Compare current emissions to user's baseline
         
@@ -268,11 +280,9 @@ class CarbonCalculator:
             }
             
         except Exception as e:
-            print(f"Error comparing to baseline: {e}")
+            logger.error(f"Error comparing to baseline: {e}")
             return {
                 'difference': 0,
                 'percentage_change': 0,
                 'status': 'error'
             }
-
-# Made with Bob

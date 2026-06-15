@@ -18,6 +18,16 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if user is authenticated
+    const user = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+    
+    if (!user || !token) {
+      // Redirect to signin if not authenticated
+      window.location.href = "/auth/signin";
+      return;
+    }
+    
     fetchDashboardData();
   }, []);
 

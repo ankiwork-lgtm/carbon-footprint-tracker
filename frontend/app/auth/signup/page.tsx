@@ -32,14 +32,18 @@ export default function SignUpPage() {
 
       const data = await response.json();
 
-      if (data.success) {
-        // Redirect to onboarding quiz
+      if (response.ok && data.success) {
+        // Store user data and token
         localStorage.setItem("user", JSON.stringify(data.data.user));
-        router.push("/onboarding");
+        localStorage.setItem("token", data.data.token);
+        
+        // Redirect to onboarding quiz
+        window.location.href = "/onboarding";
       } else {
         setError(data.error?.message || "Sign up failed");
       }
     } catch (err) {
+      console.error("Signup error:", err);
       setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);

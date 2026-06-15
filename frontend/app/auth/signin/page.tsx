@@ -31,14 +31,18 @@ export default function SignInPage() {
 
       const data = await response.json();
 
-      if (data.success) {
-        // Store user data and redirect to dashboard
+      if (response.ok && data.success) {
+        // Store user data and token
         localStorage.setItem("user", JSON.stringify(data.data.user));
-        router.push("/dashboard");
+        localStorage.setItem("token", data.data.token);
+        
+        // Force a page reload to update the auth state
+        window.location.href = "/dashboard";
       } else {
         setError(data.error?.message || "Sign in failed");
       }
     } catch (err) {
+      console.error("Signin error:", err);
       setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);

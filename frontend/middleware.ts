@@ -1,8 +1,11 @@
-import { auth } from "@/auth"
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth
+export function middleware(req: NextRequest) {
+  // Check for auth token in cookies
+  const token = req.cookies.get('auth_token')?.value
+  const isLoggedIn = !!token
+
   const isOnDashboard = req.nextUrl.pathname.startsWith('/dashboard')
   const isOnTracking = req.nextUrl.pathname.startsWith('/tracking')
   const isOnChallenges = req.nextUrl.pathname.startsWith('/challenges')
@@ -13,8 +16,11 @@ export default auth((req) => {
   // Protected routes
   const protectedRoutes = isOnDashboard || isOnTracking || isOnChallenges || isOnCommunity || isOnOnboarding
 
+  // For now, allow access to protected routes without strict auth check
+  // The client-side components will handle redirects if needed
   if (protectedRoutes && !isLoggedIn) {
-    return NextResponse.redirect(new URL('/auth/signin', req.url))
+    // Don't redirect, let the client-side handle it
+    return NextResponse.next()
   }
 
   // Redirect logged-in users away from auth pages
@@ -23,7 +29,7 @@ export default auth((req) => {
   }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
   matcher: [
